@@ -1,0 +1,109 @@
+#include <webots/robot.h>
+#include <webots/camera.h>
+#include <webots/motor.h>
+#include <webots/accelerometer.h>
+#include <webots/keyboard.h>
+#include <webots/led.h>
+#include <webots/gps.h>
+#include <stdio.h>
+
+// Global defines
+#define TRUE 1
+#define FALSE 0
+#define NO_SIDE -1
+#define LEFT 0
+#define RIGHT 1
+#define WHITE 0
+#define BLACK 1
+#define SIMULATION 0            
+// for robot_get_mode() function
+#define REALITY 2               
+// for robot_get_mode() function
+#define TIME_STEP  32           
+// [ms]
+
+//variables specific to the simulation
+#define SPEED_UNIT 0.00628
+#define MAX_SPEED 200
+#define INCR 4
+
+
+WbDeviceTag cam;
+WbDeviceTag accelerometer;
+WbDeviceTag left_motor, right_motor;
+float U=5;
+float S=5;
+int max_speed = 400;
+
+// create two variables corresponding to speed of each robots
+int speed[2]={0,0};
+
+//robot reset function
+static void reset(void)
+{
+
+  
+  // obtain and enable the camera
+  cam = wb_robot_get_device("camera");
+  wb_camera_enable(cam,TIME_STEP);
+ 
+ 
+
+  accelerometer = wb_robot_get_device("accelerometer");
+  wb_accelerometer_enable(accelerometer,TIME_STEP);
+
+  // get a handler to the motors and set target position to infinity (speed control)
+  left_motor = wb_robot_get_device("left wheel motor");
+  right_motor = wb_robot_get_device("right wheel motor");
+  wb_motor_set_position(left_motor, INFINITY);
+  wb_motor_set_position(right_motor, INFINITY);
+  wb_motor_set_velocity(left_motor, 0.0);
+  wb_motor_set_velocity(right_motor, 0.0);
+
+  // enable keyboard
+  wb_keyboard_enable(TIME_STEP);
+
+  
+}
+
+
+static void run(void) {
+
+  /*
+  wb_motor_set_velocity(left_motor,5);
+  wb_motor_set_velocity(right_motor,5);
+  wb_robot_step(2500);
+  
+  wb_motor_set_velocity(left_motor,0);
+  wb_motor_set_velocity(right_motor,0);
+  wb_robot_step(1000);
+  
+  wb_motor_set_velocity(left_motor,-5);
+  wb_motor_set_velocity(right_motor,-5);
+  wb_robot_step(5000);
+
+  wb_motor_set_velocity(left_motor,0);
+  wb_motor_set_velocity(right_motor,0);
+  wb_robot_step(1000);*/
+  
+  wb_motor_set_velocity(left_motor,U);
+  wb_motor_set_velocity(right_motor,S);
+  U-=0.001;
+
+  return;
+}
+
+int main() {
+  wb_robot_init(); /* initialize the webots controller library */
+
+  reset();
+
+  /* main loop */
+  while(wb_robot_step(TIME_STEP) != -1) {
+    run();
+  }
+
+  wb_robot_cleanup();
+
+  return 0;
+}
